@@ -1,0 +1,47 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Presenze per incontro e utente - {{ subject.name }} - Aristoph{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+          integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h3 class="mt-3">Presenze per incontro e utente - {{ subject.name }}</h3>
+        <p class="lead">{{ activity.name }}</p>
+        <a href="{% url 'stats:presences_by_meeting_and_user' activity.id subject.id 1 %}?format=xlsx"
+           class="btn btn-secondary mt-4">Scarica <i class="fas fa-file-excel"></i></a>
+        <hr>
+        <p>Numero utenti: {{ result|length }}</p>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Utente</th>
+                    <th scope="col">Classe</th>
+                    {% for meeting in meetings %}
+                        <th scope="col">{{ meeting.start_at|date:"j/m" }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in result %}
+                    <tr>
+                        <td>{{ user.full_name }}</td>
+                        <td>{{ user.classe }}</td>
+                        {% for participation in user.participations %}
+                            <td>
+                                <span class="{{ participation.text_class }}">
+                                {{ participation.presence_type }}
+                                </span>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

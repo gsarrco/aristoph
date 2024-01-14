@@ -1,0 +1,52 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Statistiche partecipazioni - Aristoph{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mt-3">Statistiche partecipazioni</h2>
+        <ul class="nav nav-tabs my-4">
+            {% for activity in activities %}
+                <li class="nav-item">
+                    <a class="nav-link {% if activity.id == activity_id %}active{% endif %}"
+                       href="{% url 'activities:list_participations_stats' activity.id %}">
+                        {{ activity.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        {% csrf_token %}
+        {% if participations %}
+            <table class="table mt-4">
+                <thead>
+                <tr>
+                    <th scope="col">studente</th>
+                    <th scope="col">classe</th>
+                    <th scope="col">tipo</th>
+                    <th scope="col">materia</th>
+                    <th scope="col">data</th>
+                    <th scope="col">presenza</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for participation in participations %}
+                    <tr>
+                        <td>{{ participation.user.full_name }}</td>
+                        <td>
+                            {% if participation.classe %}{{ participation.classe }}{% endif %}
+                        </td>
+                        <td>{{ participation.group.name }}</td>
+                        <td>{{ participation.meeting.subject.name }}</td>
+                        <td>{{ participation.meeting.start_at|date:"d/m/Y" }}</td>
+                        <td>{{ participation.presence_type.name }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>
+                Nessuna partecipazione per quest'attività.
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}

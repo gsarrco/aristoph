@@ -1,0 +1,98 @@
+{% load static %}
+
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="icon" type="image/png" href="{% static 'icon-16.png' %}" sizes="16x16">
+    <link rel="icon" type="image/png" href="{% static 'icon-32.png' %}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{% static 'icon-192.png' %}" sizes="192x192">
+    <link rel="icon" type="image/png" href="{% static 'icon-512.png' %}" sizes="512x512">
+    <link rel="apple-touch-icon" href="{% static 'icon-180.png' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous" />
+
+    <title>{% block title %}Aristoph{% endblock %}</title>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home:index' %}">
+                <img src="{% static 'logo-navbar.png' %}" height="30" class="d-inline-block align-top" alt="Aristoph">
+            </a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home:index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'activities:list_activities' %}">Attività</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Assistenza</a>
+                    </li>
+                    {% if user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Account
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{% url 'account:settings' %}">Impostazioni</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">Esci</a>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Accedi</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main role="main">
+        {% block content %}{% endblock %}
+    </main>
+    <br><br><br><br><br>
+    <footer class="container">
+        <hr>
+        <small class="text-muted">
+            <strong>© 2015-{% now "Y" %} Giacomo Sarrocco</strong>
+        </small>
+        <div class="float-sm-right mt-3 mt-sm-0">
+            <small>
+                <a href="{% url 'home:privacy' %}"
+                title="Privacy Policy">Privacy Policy</a>
+                | <a href="{% url 'home:cookie' %}" title="Cookie Policy">Cookie Policy</a>
+            </small>
+        </div>
+    </footer>
+    <br><br>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.min.js" integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js" integrity="sha256-fTuUgtT7O2rqoImwjrhDgbXTKUwyxxujIMRIK7TbuNU=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha256-CjSoeELFOcH0/uxWu6mC/Vlrc1AARqbm/jiiImDGV3s=" crossorigin="anonymous"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

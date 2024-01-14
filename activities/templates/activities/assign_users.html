@@ -1,0 +1,73 @@
+<p>Seleziona il tipo di partecipazione che vuoi aggiungere e poi cerca l'utente interessato.</p>
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="form-group">
+            <label for="group">Tipo</label>
+            <select name="group" class="form-control" id="group">
+                {% for group in groups %}
+                    <option value="{{ group.id }},{{ group.name }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-md-8 mb-3">
+        <div id="search-box" class="mt-4"></div>
+        <div class="list-group" id="hits"></div>
+    </div>
+</div>
+<div class="form-group">
+    <label for="users">Utenti selezionati</label>
+    <select name="users[]" id="users" class="form-control" multiple="multiple" size="10">
+        {% for default_assigned_user in default_assigned_users %}
+            <option value="{{ default_assigned_user.user_id }},{{ default_assigned_user.group_id }}"
+                    selected="selected">
+                {{ default_assigned_user.user.full_name }} / {{ default_assigned_user.group.name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.4"></script>
+<script>
+    const search = instantsearch({
+        appId: '{{ algolia_config.APPLICATION_ID }}',
+        apiKey: '{{ algolia_config.SEARCH_KEY }}',
+        indexName: 'users',
+        routing: true
+    });
+
+    search.addWidget(
+        instantsearch.widgets.searchBox({
+            container: '#search-box',
+            placeholder: 'Cerca utente',
+            cssClasses: {root: 'mb-3'}
+        })
+    );
+    search.addWidget({
+        render: (data) => {
+            const $hits = [];
+            data.results.hits.forEach((hit) => {
+                let template = '<button type="button" class="list-group-item list-group-item-action">' + hit._highlightResult.full_name.value;
+                if (hit._highlightResult.classe) {
+                    template += ' : ' + hit._highlightResult.classe.value;
+                }
+                template += '</button>';
+
+                const $hit = $(template);
+
+                $hit.click(() => {
+                    const group = $('#group').val().split(',');
+
+                    $('#users')
+                        .append($("<option></option>")
+                            .attr("value", hit.objectID + ',' + group[0])
+                            .attr("selected", "selected")
+                            .text(hit.full_name + ' / ' + group[1]));
+                });
+                $hits.push($hit);
+            });
+            $('#hits').html($hits);
+        }
+    });
+
+    search.start();
+</script>

@@ -1,0 +1,46 @@
+<div class="action_buttons mt-4" style="display: none">
+    {% if is_staff or is_teacher %}
+        <span class="btn-group mr-3" role="group" aria-label="Basic example">
+            <button type="submit" class="btn btn-success" name="action" value="present">Presente</button>
+            <button type="submit" class="btn btn-secondary" name="action" value="absent">
+                Assente
+            </button>
+        </span>
+        <span class="dropdown mr-5">
+            <button class="btn btn-light" type="button" id="dropdownMenuButton"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <span class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <button type="submit" class="dropdown-item" name="action"
+                        value="justify">Assenza giustificata</button>
+                <button type="submit" class="dropdown-item" name="action"
+                        value="absent_morning">Assente mattina</button>
+                <button type="submit" class="dropdown-item" name="action"
+                        value="late_entry">Entrata posticipata</button>
+                <button type="submit" class="dropdown-item" name="action" value="early_exit">Uscita anticipata</button>
+                <button type="submit" class="dropdown-item" name="action" value="unspecified_presence">
+                    Presenza non segnata</button>
+                <hr>
+                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#setGradeModal">
+                    Voto
+                </button>
+                {% if is_staff %}
+                    <hr>
+                    <button type="button" class="dropdown-item" data-toggle="modal" data-target="#groupModal">
+                    Raggruppa
+                    </button>
+                    <button type="submit" class="dropdown-item" name="action"
+                            value="delete_group">Elimina gruppo</button>
+                {% endif %}
+            </span>
+        </span>
+    {% endif %}
+    {% if is_staff %}
+        <button type="submit" class="btn btn-danger" name="action" value="delete"
+                data-toggle="confirmation" data-title="Sei sicuro di voler eliminare le partecipazioni?">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    {% endif %}
+
+</div>

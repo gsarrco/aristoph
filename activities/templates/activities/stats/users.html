@@ -1,0 +1,45 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Statistiche {{ participation_group.name }} - Aristoph{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+          integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mt-3">Statistiche {{ participation_group.name }}</h2>
+        <p class="lead mb-4">{{ activity.name }}</p>
+
+        <a href="{% url 'activities:user_stats_xlsx' activity.id participation_group.id %}"
+           class="btn btn-secondary my-4">Scarica <i class="fas fa-file-excel"></i></a>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">{{ participation_group.name.capitalize }}</th>
+                {% if participation_group.id != 3 %}
+                    <th scope="col">Classe</th>
+                {% endif %}
+                <th scope="col">N. presenze</th>
+                <th scope="col">Ore di presenza</th>
+                <th scope="col">Materie</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.user__full_name }}</td>
+                    {% if participation_group.id != 3 %}
+                        <td>{% if user.user__classe %}{{ user.user__classe }}{% endif %}</td>
+                    {% endif %}
+                    <td>{{ user.presences_count }}</td>
+                    <td>{{ user.meeting_duration_sum }}</td>
+                    <td>{{ user.subjects_string }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

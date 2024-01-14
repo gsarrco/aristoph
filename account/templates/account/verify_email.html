@@ -1,0 +1,32 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Verifica email - Aristoph{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-4">Verifica email</h1>
+        <p class="lead">Ti abbiamo inviato un'email contenente un codice di verifica.</p>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <div class="row mt-5">
+            <div class="col-md-5 mb-5">
+                <form method="post" action="{% url 'account:verify_email' %}">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{ email }}" name="email">
+                    <div class="form-group">
+                        <input type="number" class="form-control" placeholder="Codice di verifica" name="code">
+                    </div>
+                    <div class="form-group mt-4">
+                        <input type="password" class="form-control" placeholder="Conferma password" name="password">
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">
+                        Accedi
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

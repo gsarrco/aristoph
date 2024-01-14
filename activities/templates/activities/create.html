@@ -1,0 +1,53 @@
+{% extends "home/wrapper.html" %}
+{% load markdownify %}
+
+{% block title %}Crea attività - Aristoph{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mt-3">Crea attività</h2>
+        <hr>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-4" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <form method="post" action="{% url 'activities:create_activities' %}" class="mt-5">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Nome</label>
+                <input type="text" class="form-control" id="name" name="name" aria-describedby="nameHelp" required>
+                <small id="nameHelp" class="form-text text-muted">
+                    Es. <em>Giochi matematici 2019-20</em> oppure <em>Laboratorio teatrale 2019-20</em>.
+                </small>
+            </div>
+            <div class="form-group form-check mt-5">
+                <input type="checkbox" class="form-check-input" id="are_subjects_present" name="are_subjects_present"
+                       value="1">
+                <label class="form-check-label" for="are_subjects_present">
+                    L'attività ha delle suddivisioni, come per esempio diverse materie al suo interno?
+                </label>
+            </div>
+            <div class="form-group" style="display: none;" id="subjects_group">
+                <label for="subjects">Materie o suddivisioni</label>
+                <textarea class="form-control" id="subjects" name="subjects" aria-describedby="subjectsHelp"></textarea>
+                <small id="subjectsHelp" class="form-text text-muted">
+                    Scrivi una materia per riga.
+                </small>
+            </div>
+            <button type="submit" class="btn btn-primary mt-5">
+                Crea
+            </button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+            $("#are_subjects_present").click(function () {
+                $("#subjects_group").toggle(this.checked);
+            });
+        });
+    </script>
+{% endblock %}

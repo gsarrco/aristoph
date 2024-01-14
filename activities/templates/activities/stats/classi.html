@@ -1,0 +1,42 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Statistiche classi - Aristoph{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mt-3">Statistiche classi</h2>
+        <p class="lead mb-4">{{ activity.name }}, {{ participation_group.name }}</p>
+
+        <p class="mb-4">Clicca su una classe per vedere tutte le partecipazioni dei suoi studenti.</p>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Classe</th>
+                <th scope="col">Presenze totali</th>
+                <th scope="col">N. utenti con presenze</th>
+                <th scope="col">Assenze totali</th>
+                <th scope="col">N. utenti con assenze</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for classe in classi %}
+                <tr>
+                    <td>
+                        {% if classe.user__classe %}
+                            <a href="{% url 'activities:list_participations' activity.id %}?classe={{ classe.user__classe }}">
+                                {{ classe.user__classe }}
+                            </a>
+                        {% else %}
+                            senza classe
+                        {% endif %}
+                    <td>{{ classe.presences_count }}</td>
+                    <td>{{ classe.present_users_count }}</td>
+                    <td>{{ classe.absences_count }}</td>
+                    <td>{{ classe.absent_users_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

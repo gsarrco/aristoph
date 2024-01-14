@@ -1,0 +1,49 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Statistiche materie - Aristoph{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mt-3">Statistiche materie</h2>
+        <p class="lead">{{ activity.name }}</p>
+        <hr>
+        <h3 class="mb-3">Partecipazioni per materia</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Materia</th>
+                <th scope="col">Presenze</th>
+                <th scope="col">Assenze</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for subject in subjects %}
+                <tr>
+                    <td>{{ subject.name }}</td>
+                    <td>{{ subject.presences_count }}</td>
+                    <td>{{ subject.absences_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <h3 class="mt-4 mb-3">Incontri per materia</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Materia</th>
+                <th scope="col">Incontri svolti</th>
+                <th scope="col">Incontri non svolti</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for subject in subjects %}
+                <tr>
+                    <td>{{ subject.name }}</td>
+                    <td>{{ subject.attended_meetings }}</td>
+                    <td>{{ subject.unattended_meetings }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

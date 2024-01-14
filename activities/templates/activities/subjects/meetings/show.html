@@ -1,0 +1,410 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}{{ meeting.subject.name }} {{ meeting.start_at|date:"j/m" }} - Aristoph{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+          integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.4/dist/instantsearch.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.4/dist/instantsearch-theme-algolia.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.jsdelivr.net/npm/spectrum-colorpicker2@2.0.0/dist/spectrum.min.css">
+    <style>
+        .ais-search-box {
+            max-width: none;
+        }
+
+        .ais-search-box--input {
+            font-size: 16px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a
+                        href="{% url 'activities:show_activity' activity.id %}">{{ activity.name }}</a></li>
+                <li class="breadcrumb-item"><a
+                        href="{% url 'activities:show_subject' activity.id meeting.subject_id %}">{{ meeting.subject.name }}</a>
+                </li>
+                <li class="breadcrumb-item"><a
+                        href="{% url 'activities:show_date' activity.id meeting.start_at.year meeting.start_at.month meeting.start_at.day %}">{{ meeting.start_at|date:"j b" }}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">#{{ meeting.id }}</li>
+            </ol>
+        </nav>
+        <h3 class="mt-3">
+            {{ meeting.subject.name }} {{ meeting.start_at|date:"j/m" }}
+        </h3>
+        <p class="lead">
+            {% if meeting.start_at != meeting.end_at %}
+                Ora: {{ meeting.start_at|date:"H:i" }}-{{ meeting.end_at|date:"H:i" }}.
+            {% endif %}
+            {% if meeting.room %}
+                Luogo: {{ meeting.room }}.
+            {% endif %}
+        </p>
+        <hr>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-4" role="alert">
+                {{ message|safe }}
+            </div>
+        {% endfor %}
+        {% if is_student and not has_reservation and activity.allow_new_reservations %}
+            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#reserveModal">
+                Prenotati
+            </button>
+
+            <div class="modal fade" id="reserveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form class="mt-4"
+                              action="{% url 'activities:reserve_meeting' activity.id meeting.subject_id meeting.id %}"
+                              method="post">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Prenotati</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="topic">Argomento</label>
+                                    <input type="text" class="form-control" id="topic" name="topic"
+                                           aria-describedby="emailHelp">
+                                    <small id="emailHelp" class="form-text text-muted">Spiega in modo esaustivo
+                                        l'argomento da trattare
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                                <button type="submit" class="btn btn-primary">Prenotati</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if is_teacher or is_staff and activity.allow_teacher_topics %}
+            <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#editTopicModal">
+                Argomento lezione
+            </button>
+
+            <div class="modal fade" id="editTopicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form class="mt-4"
+                              action="{% url 'activities:edit_topic' activity.id meeting.subject_id meeting.id %}"
+                              method="post">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Argomento della lezione</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Gli argomenti della lezione sono
+                                    specifici e diversi
+                                    per ogni docente inserito nell'incontro.</p>
+                                <div class="form-group">
+                                    <label for="topic">Argomento</label>
+                                    <textarea class="form-control" id="topic"
+                                              name="topic">{{ teacher_topic }}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                                <button type="submit" class="btn btn-primary">Salva</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if is_staff or is_teacher %}
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">
+                <i class="fas fa-plus-circle"></i>
+                partec.
+            </button>
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form class="mt-4"
+                              action="{% url 'activities:add_users_to_meetings' activity.id meeting.id %}"
+                              method="post">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Aggiungi partecipazioni manualmente</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                {% include 'activities/assign_users.html' %}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                                <button type="submit" class="btn btn-primary">Aggiungi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if is_staff %}
+            <div class="btn-group" role="group">
+                <button id="btnGroupDrop1" type="button" class="btn btn-white ml-3"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v text-secondary"></i>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                    <button type="button" class="dropdown-item" data-toggle="modal" data-target="#deleteMeetingModal">
+                        <i class="fas fa-trash"></i> Elimina incontro
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal fade" id="deleteMeetingModal" tabindex="-1" role="dialog"
+                 aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form class="mt-4"
+                              action="{% url 'activities:delete_meeting' activity.id meeting.subject_id meeting.id %}"
+                              method="post">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Elimina incontro</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning" role="alert">
+                                    <p>
+                                        Cliccando su "Elimina incontro" eliminerai l'incontro e tutte le partecipazione
+                                        associate.
+                                    </p>
+                                    <p>
+                                        L'incontro e le partecipazioni cancellate potranno essere ripristinate solo
+                                        dagli amministratori di sistema.
+                                    </p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="message">Messaggio ai prenotati</label>
+                                    <textarea class="form-control" id="message" name="message" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
+                                <button type="submit" class="btn btn-danger">Elimina incontro</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if not user.is_authenticated %}
+            <div class="alert alert-warning">
+                Per prenotare o modificare le attività, <a href="{% url 'login' %}">effettua il login</a>.
+            </div>
+        {% endif %}
+        {% if is_teacher or is_staff %}
+            <div class="alert alert-info mt-5 mb-4" role="alert">
+                <small>Per selezionare/deselezionare velocemente tutte le partecipazioni, clicca sulla casella nella
+                    prima riga della tabella.</small>
+            </div>
+        {% endif %}
+        <form method="post"
+              action="{% url 'activities:edit_participations' %}">
+            {% csrf_token %}
+            {% include 'activities/participations/edit_toolbar.html' %}
+            <div class="modal fade" id="setGradeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Aggiungi/modifica voto</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="grade">Voto</label>
+                                <input class="form-control" id="grade" name="grade" aria-describedby="gradeHelp">
+                                <small id="gradeHelp" class="form-text text-muted">
+                                    Il voto può essere sia un numero sia un testo.<br><br>
+                                    Per rimuovere un voto che hai aggiunto, lasciare il campo vuoto e salvare.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                            <button type="submit" name="action" value="set_grade" class="btn btn-primary">Salva</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Crea gruppo di partecipazioni</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="color">Colore</label>
+                                <input class="form-control" id="color" name="color">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                            <button type="submit" name="action" value="group" class="btn btn-primary">Salva</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                {% for group in groups %}
+                    <div class="col-lg-{{ group.width }}">
+                        <h4 class="mb-3">
+                            {{ group.name }}
+                            <span class="badge badge-dark"
+                                  style="font-size: 0.8rem">{{ group.participations.count }}</span>
+                        </h4>
+
+                        {% if group.participations %}
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    {% if is_staff or is_teacher %}
+                                        <th scope="col">
+                                            <input type="checkbox" class="select_all_checkboxes"
+                                                   id="select_all_{{ group.id }}_checkbox">
+                                        </th>
+                                    {% endif %}
+                                    <th scope="col">utente</th>
+                                    {% if group.id != 3 %}
+                                        <th scope="col"></th>
+                                    {% endif %}
+                                    {% if group.id != 3 and activity.allow_student_topics or group.id == 3 and activity.allow_teacher_topics %}
+                                        <th scope="col">
+                                            {% if group.id == 3 %}
+                                                argomento lezione
+                                            {% else %}
+                                                argomento
+                                            {% endif %}
+                                        </th>
+                                    {% endif %}
+                                    <th scope="col">pres</th>
+                                    {% if grades_exist and group.id == 1 %}
+                                        <th scope="col">voto</th>
+                                    {% endif %}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for participation in group.participations %}
+                                    <tr id="{{ participation.id }}_row"
+                                            {% if participation.group_color and not participation.participation_group %}
+                                        class="table-{{ participation.group_color }}"{% endif %}
+                                        {% if participation.participation_group %}style="background-color: {{ participation.participation_group.color }}"{% endif %}>
+                                        {% if is_staff or is_teacher %}
+                                            <td>
+                                                <input type="checkbox" name="selected_participations[]"
+                                                       class="selected_participations"
+                                                       value="{{ participation.id }}">
+                                            </td>
+                                        {% endif %}
+                                        <td>
+                                            {% if is_staff %}
+                                                <a href="{% url 'activities:list_participations_by_user' activity.id participation.user_id %}">
+                                                    {{ participation.user.full_name }}
+                                                </a>
+                                            {% else %}
+                                                {{ participation.user.full_name }}
+                                            {% endif %}
+                                        </td>
+                                        {% if group.id != 3 %}
+                                            <td>{% if participation.classe %}
+                                                {{ participation.classe }} {% endif %}</td>
+                                        {% endif %}
+                                        {% if group.id != 3 and activity.allow_student_topics or group.id == 3 and activity.allow_teacher_topics %}
+                                            <td>{% if participation.topic %}
+                                                {{ participation.topic }} {% endif %}</td>
+                                        {% endif %}
+                                        <td>{{ participation.presence_type.name }}</td>
+                                        {% if grades_exist and group.id == 1 %}
+                                            <td>
+                                                {% if participation.grade %}
+                                                    {{ participation.grade }}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>Nessuna partecipazione</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            {% include 'activities/participations/edit_toolbar.html' %}
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/spectrum-colorpicker2@2.0.0/dist/spectrum.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-confirmation2/dist/bootstrap-confirmation.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".selected_participations").click(function () {
+                const numberOfChecked = $('.selected_participations:checked').length;
+                $('.action_buttons').toggle(numberOfChecked > 0);
+            });
+            $('[data-toggle=confirmation]').confirmation({
+                rootSelector: '[data-toggle=confirmation]',
+                btnOkLabel: 'Conferma',
+                btnCancelLabel: 'Annulla'
+            });
+            $(".select_all_checkboxes").click(function () {
+                $('.selected_participations').click();
+                $(".select_all_checkboxes").prop('checked', $(this).is(':checked'));
+            });
+            $('#color').spectrum({
+                type: "color",
+                showPalette: "false",
+                showPaletteOnly: "true",
+                palette: [
+                    ["#FFCCCC", "#FFE5CC", "#FFFFCC", "#E5FFCC", "#CCFFCC", "#CCFFE5", "#CCFFFF"],
+                    ["#CCE5FF", "#CCCCFF", "#E5CCFF", "#FFCCFF", "#FFCCE5", "#E0E0E0"]
+                ],
+                move: function (color) {
+                    const selected_participations = $('.selected_participations:checked');
+                    selected_participations.each(function () {
+                        $('#' + this.value + '_row').css("background-color", color.toHexString());
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

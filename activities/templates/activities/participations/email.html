@@ -1,0 +1,52 @@
+<html>
+<body>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "EventReservation",
+  "reservationNumber": "{{ participation.id }}",
+  "reservationStatus": "http://schema.org/Confirmed",
+  "underName": {
+    "@type": "Person",
+    "name": "{{ user.full_name }}"
+  },
+  "reservationFor": {
+    "@type": "Event",
+    "name": "Incontro di {{ meeting.subject.name }} di {{ meeting.activity.name }}",
+    "startDate": "{{ meeting.start_at|date:'c' }}",
+    "endDate": "{{ meeting.end_at|date:'c' }}",
+    "location": {
+      "@type": "Place",
+      "name": "Liceo Classico e Linguistico Statale Aristofane",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Via Monte Resegone 3",
+        "addressLocality": "Roma",
+        "addressRegion": "RM",
+        "postalCode": "00139",
+        "addressCountry": "IT"
+      }
+    }
+  }
+}
+</script>
+<p>
+    Ciao {{ user.full_name }},
+</p>
+<p>
+    Ti sei prenotato con successo per l'incontro di {{ meeting.subject.name }} di {{ meeting.activity.name }}
+    del {{ meeting.start_at|date:"j F" }}, dalle {{ meeting.start_at|date:"H:i" }} alle {{ meeting.end_at|date:"H:i" }}.
+    Recati per quell'ora in aula {{ meeting.room }} della sede centrale del Liceo Aristofane.
+</p>
+<p>
+    <strong>In caso non potrai più andare, cancellala il prima possibile</strong> in "Mie partecipazioni" nella pagina
+    dell'attività. <strong>In caso di assenza senza preavviso, non potrai più prenotarti autonomamente</strong> su
+    Aristoph per una
+    nuova lezione.
+</p>
+<br>
+<p>
+    Team Aristoph
+</p>
+</body>
+</html>

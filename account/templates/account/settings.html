@@ -1,0 +1,39 @@
+{% extends "home/wrapper.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Impostazioni account - Aristoph{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mt-3">Impostazioni account</h2>
+        <hr>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-4" role="alert">
+                <div class="my-2">
+                    {{ message|safe }}
+                </div>
+            </div>
+        {% endfor %}
+        <div class="row mt-4">
+            <div class="col-md-5 mb-5">
+                <form method="post" action="{% url 'account:update_user' %}">
+                    {% csrf_token %}
+                    {{ account_form|crispy }}
+                    <button type="submit" class="btn btn-primary">
+                        Salva
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-5 offset-md-2 mb-5">
+                <h3>Cambia password</h3>
+                <form method="post" action="{% url 'account:change_password' %}">
+                    {% csrf_token %}
+                    {{ password_change_form|crispy }}
+                    <button type="submit" class="btn btn-secondary">
+                        Cambia
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

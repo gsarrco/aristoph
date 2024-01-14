@@ -1,0 +1,189 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}{{ activity.name }} - Aristoph{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h3 class="mt-3">{{ activity.name }}</h3>
+
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <hr>
+        {% if not user.is_authenticated %}
+            <div class="alert alert-warning">
+                Per prenotare o modificare le attività, <a href="{% url 'login' %}">effettua il login</a>.
+            </div>
+        {% endif %}
+
+        {% if is_staff or is_teacher %}
+            <a href="{% url 'activities:create_subjects' activity.id %}"
+               class="btn btn-secondary btn-sm">
+                + materie
+            </a>
+        {% endif %}
+
+        {% if activity.are_applications_active %}
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Candidati come tutor
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    {% for subject in subjects %}
+                        <a class="dropdown-item"
+                           href="{% url 'activities:create_applications' activity.id subject.id %}">
+                            {{ subject.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if activity.are_registrations_active %}
+            <a href="{% url 'activities:create_registrations' activity.id %}" class="btn btn-primary">Iscriviti</a>
+        {% endif %}
+
+        {% if activity.are_meetings_active %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h4 class="mt-4 mb-3">Incontri</h4>
+                    {% if subjects %}
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                {% for subject in subjects %}
+                                    <a href="{% url 'activities:show_subject' activity.id subject.id %}"
+                                       class="nav-link active">
+                                        {{ subject.name }}
+                                    </a>
+                                {% endfor %}
+                            </li>
+                        </ul>
+                        {% if are_there_meetings %}
+                            <hr class="mt-5">
+                            <input type="text" class="form-control form-control-sm" placeholder="Sfoglia per data"
+                                   id="datepicker">
+                        {% endif %}
+                    {% else %}
+                        <p class="mt-4">
+                            Nessuna materia ancora creata.
+                            {% if is_staff or is_teacher %}
+                                <a href="{% url 'activities:create_subjects' activity.id %}">Creane una</a>.
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+                {% if user.is_authenticated %}
+                    <div class="col-md-6 mb-3">
+                        <h4 class="my-4">Mie partecipazioni</h4>
+                        {% if participations %}
+                            <div class="list-group">
+                                {% for participation in participations %}
+                                    <a href="{% url 'activities:show_participation' activity.id participation.id %}"
+                                       class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">{{ participation.meeting.subject.name }}</h5>
+                                            <small class="text-muted">
+                                                {{ participation.presence_type.name }}
+                                            </small>
+                                        </div>
+                                        <p class="mb-1">{{ participation.meeting.start_at|date:"D j b, H:i" }}</p>
+                                    </a>
+                                {% endfor %}
+                                <nav class="mt-3">
+                                    <ul class="pagination">
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="{% url 'activities:list_participations_by_user' activity.id user.id %}">mostra
+                                            tutte</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        {% else %}
+                            <p>Ancora nessuna partecipazione</p>
+                        {% endif %}
+                        {% if is_staff or is_teacher %}
+                            <hr>
+                            <h4 class="my-4">Statistiche</h4>
+
+                            <h6 class="mb-3">Partecipazioni</h6>
+
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                {% if is_staff %}
+                                    <div class="btn-group" role="group">
+                                        <a class="btn btn-sm btn-primary"
+                                           href="{% url 'activities:list_participations' activity.id %}">
+                                            Lista filtrabile
+                                        </a>
+
+                                        <div class="btn-group" role="group">
+                                            <button id="btnGroupDrop1" type="button"
+                                                    class="btn btn-sm btn-secondary dropdown-toggle"
+                                                    data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                Riepilogo ore
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                                {% for group in groups %}
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'activities:user_stats' activity.id group.id %}">
+                                                        {{ group.name }}
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% if activity.has_default_assigned_users %}
+                                            <a class="btn btn-sm btn-secondary"
+                                               href="{% url 'stats:student_registry' activity.id %}">
+                                                Registro studenti
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <h6 class="mt-4 mb-3">Classi e materie</h6>
+
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                {% if is_teacher or is_staff %}
+                                    <a class="btn btn-success btn-sm"
+                                       href="{% url 'activities:classe_stats' activity.id 1 %}">Classi</a>
+                                {% endif %}
+                                {% if is_staff %}
+                                    <a class="btn btn-success btn-sm"
+                                       href="{% url 'activities:subject_stats' activity.id %}">Materie</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#datepicker").flatpickr({
+                locale: "it",
+                disableMobile: "true",
+                onChange: function (selectedDates) {
+                    const selectedDate = selectedDates[0];
+                    console.log(selectedDate);
+                    window.location.href = "/activities/{{ activity.id }}/dates/" + selectedDate.getFullYear() + '/' + (selectedDate.getMonth() + 1) + '/' + selectedDate.getDate();
+                },
+            });
+
+        });
+    </script>
+{% endblock %}

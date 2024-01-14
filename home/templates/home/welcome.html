@@ -1,0 +1,38 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Aristoph: La scuola 2.0{% endblock %}
+
+{% block content %}
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-3">La scuola 2.0 è qui</h1>
+            <p>Aristoph collega studenti, docenti, famiglie e amministrazione scolastica in modo veloce, efficace e
+                innovativo.</p>
+            <p>
+                <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Accedi</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="container">
+        <br>
+        <div class="row">
+            <div class="col-md-4">
+                <h2>A portata di mano</h2>
+                <p>Accedi alle attività scolastiche con un click, da qualsiasi dispositivo, in qualsiasi momento.</p>
+            </div>
+            <div class="col-md-4">
+                <h2>Innovativo</h2>
+                <p>Grazie ai dati raccolti e alle tecnologie utilizzate, gli enti scolastici possono svolgere ricche
+                    analisi
+                    aumentando la qualità generale dei servizi offerti.</p>
+            </div>
+            <div class="col-md-4">
+                <h2>Accessibile</h2>
+                <p>Semplicità d'uso e facilità d'accesso garantiscono una maggiore partecipazione e coinvolgimento di
+                    tutti i
+                    soggetti.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

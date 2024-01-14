@@ -1,0 +1,42 @@
+{% extends "home/wrapper.html" %}
+
+{% block title %}Attività - Aristoph{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mt-3">Attività</h2>
+        <hr>
+        {% if is_staff or is_teacher %}
+            <a href="{% url 'activities:create_activities' %}"
+               class="btn btn-secondary btn-sm">
+                + attività
+            </a>
+        {% endif %}
+        <div class="row">
+            {% if active_activities %}
+                <div class="col-md-6">
+                    <h3 class="mt-4 mb-3">In corso</h3>
+                    <div class="list-group">
+                        {% for activity in active_activities %}
+                            <a href="{% url 'activities:show_activity' activity.id %}"
+                               class="list-group-item list-group-item-action">{{ activity.name }}</a>
+                        {% endfor %}
+                    </div>
+            </div>
+            {% endif %}
+            {% if past_activities %}
+                <div class="col-md-6">
+                    <h3 class="mt-4 mb-3">Passate</h3>
+
+                    <div class="list-group">
+                        {% for activity in past_activities %}
+                            <a href="{% url 'activities:show_activity' activity.id %}"
+                               class="list-group-item list-group-item-action">{{ activity.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+{% endblock %}
